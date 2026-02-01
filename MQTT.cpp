@@ -62,8 +62,8 @@ void cMQTT::mqttLoop() {
 
       if (client.connect(MQTT_clientName, MQTT_username, MQTT_password, MQTT_PUBLISH_willTopic, 0, true, MQTT_payloadNotAvailable, true)) {
         client.publish(MQTT_PUBLISH_willTopic, MQTT_payloadAvailable);
-        client.subscribe(MQTT_PUBLISH_TOPIC_COM);
-        client.subscribe(MQTT_PUBLISH_TOPIC_stOTA);
+       // client.subscribe(MQTT_PUBLISH_TOPIC_COM);
+       // client.subscribe(MQTT_PUBLISH_TOPIC_stOTA);
 
         mqttState = MqttState::CONNECTED;
       } else {
