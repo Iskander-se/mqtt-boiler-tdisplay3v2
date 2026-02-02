@@ -2,7 +2,6 @@
 #include <stdint.h>
 
 // ==== Hardware ====
-constexpr uint8_t RELAY_PIN = 5;
 
 // ==== Timing ====
 constexpr uint32_t LOGIC_PERIOD_MS = 200;

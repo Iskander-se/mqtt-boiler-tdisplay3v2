@@ -1,11 +1,12 @@
 #pragma once
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "core.h"
 
 class cMQTT {
 public:
   cMQTT();
-  void loop();
+  void loop(const BoilerStateData& state);
 
 private:
   enum class WifiState : uint8_t { IDLE,
@@ -27,11 +28,14 @@ private:
   MqttState mqttState;
   uint32_t mqttStartMs;
   uint8_t mqttRetries;
-  void mqttLoop();
+  void mqttLoop(const BoilerStateData& state);
 
   // connect
   WiFiClient espClient;
   PubSubClient client;
+
+  //core
+  BoilerStateData cachedState{};
 
   // Callback
   //void (*messageCallback)(char* topic, byte* payload, unsigned int length);

@@ -66,10 +66,10 @@ void Views::render(const BoilerStateData& stateData) {
       case BoilerState::SCREEN_WAKE:
         tft->setTextSize(7);
         tft->setTextColor(TFT_GOLD, TFT_BLACK);
-        tft->drawString("50.2", 67, 36);
+        tft->drawString(String(stateData.temp_tank, 1), 67, 36);
         tft->setTextSize(5);
         tft->setTextColor(TFT_ORANGE, TFT_BLACK);
-        tft->drawString("25.9", 43, 98);
+        tft->drawString(String(stateData.temp_solar, 1), 43, 98);
         break;
       case BoilerState::HEATING:
         int timer1 = stateData.timerMin;
