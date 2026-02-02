@@ -61,10 +61,10 @@ void cMQTT::mqttLoop(const BoilerStateData& stateData) {
         break;
       }
 
-      if (client.connect(MQTT_BASE, MQTT_username, MQTT_password, MQTT_PUBLISH_WILL_TOPIC, 0, true, MQTT_payloadNotAvailable, true)) {
-        client.publish(MQTT_PUBLISH_WILL_TOPIC, MQTT_payloadAvailable);
+      if (client.connect(MQTT_BASE, MQTT_username, MQTT_password, MQTT_PUBLISH_willTopic, 0, true, MQTT_payloadNotAvailable, true)) {
+        client.publish(MQTT_PUBLISH_willTopic, MQTT_payloadAvailable);
         client.subscribe(MQTT_PUBLISH_TOPIC_COM);
-        Serial.println(MQTT_PUBLISH_WILL_TOPIC);
+        Serial.println(MQTT_PUBLISH_willTopic);
         // client.subscribe(MQTT_PUBLISH_TOPIC_stOTA);
 
         mqttState = MqttState::CONNECTED;
@@ -88,12 +88,13 @@ void cMQTT::mqttLoop(const BoilerStateData& stateData) {
         //else if (stateData.timerMin != cachedState.timerMin) changed = true;
         //else if (stateData.heating != cachedState.heating) changed = true;
 
-        if (stateData.temp_tank != cachedState.temp_tank) client.publish("MQTT_PUBLISH_TOPIC_TEMP1", String(stateData.temp_tank, 1).c_str(), true);
-        if (stateData.temp_solar != cachedState.temp_solar) client.publish("MQTT_PUBLISH_TOPIC_TEMP2", String(stateData.temp_solar, 1).c_str(), true);
-        if (stateData.heating != cachedState.heating) client.publish("MQTT_PUBLISH_TOPIC_STATUS", String(stateData.heating, 1).c_str(), true);
+        if (stateData.temp_tank != cachedState.temp_tank) client.publish(MQTT_PUBLISH_TOPIC_TEMP1, String(stateData.temp_tank, 1).c_str(), true);
+        if (stateData.temp_solar != cachedState.temp_solar) client.publish(MQTT_PUBLISH_TOPIC_TEMP2, String(stateData.temp_solar, 1).c_str(), true);
+        if (stateData.timerMin != cachedState.timerMin) client.publish(MQTT_PUBLISH_TOPIC_TIMER, String(stateData.timerMin).c_str(), true);
+        if (stateData.heating != cachedState.heating) client.publish(MQTT_PUBLISH_TOPIC_STATUS, String(stateData.heating).c_str(), true);
 
-
-        Serial.println(MQTT_PUBLISH_TOPIC_STATUS);
+        Serial.println(MQTT_PUBLISH_willTopic);
+        Serial.println(String(stateData.timerMin).c_str());
         cachedState = stateData;
       }
 

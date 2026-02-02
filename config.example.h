@@ -17,11 +17,14 @@ constexpr uint16_t MQTT_PORT = 1883;
 
 const char* MQTT_username = "####"; // login user to server MQTT
 const char* MQTT_password = "###"; // password login to server MQTT
-const char* MQTT_clientName = "mqtt_boiler"; // host name device ini
 
-//countdown
-const char* MQTT_PUBLISH_TOPIC_STATUS = "mqtt_boiler/status";
-const char* MQTT_PUBLISH_willTopic = "mqtt_boiler/avaliability";
+#define MQTT_BASE "mqtt_boiler"  // host name device ini
 
-const char* MQTT_payloadAvailable = "OK";
-const char* MQTT_payloadNotAvailable = "Fail";
+#define MQTT_PUBLISH_TOPIC_STATUS MQTT_BASE "/status"
+#define MQTT_PUBLISH_willTopic MQTT_BASE "/avaliability"
+#define MQTT_PUBLISH_TOPIC_COM MQTT_BASE "/set"
+#define MQTT_PUBLISH_TOPIC_TEMP1 MQTT_BASE "/temp1"
+#define MQTT_PUBLISH_TOPIC_TEMP2 MQTT_BASE "/temp2"
+
+#define MQTT_payloadAvailable "OK"
+#define MQTT_payloadNotAvailable "Fail"
