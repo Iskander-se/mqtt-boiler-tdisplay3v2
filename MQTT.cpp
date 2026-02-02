@@ -62,6 +62,45 @@ void cMQTT::mqttLoop(const BoilerStateData& stateData) {
       }
 
       if (client.connect(MQTT_BASE, MQTT_username, MQTT_password, MQTT_PUBLISH_willTopic, 0, true, MQTT_payloadNotAvailable, true)) {
+        // Публикуем конфиг Discovery один раз
+        client.publish((String("homeassistant/sensor/") + MQTT_BASE + "/temp1/config").c_str(),
+                       ("{\"name\":\"Temp Sensor 1\","
+                        "\"state_topic\":\""
+                        + String(MQTT_PUBLISH_TOPIC_TEMP1) + "\","
+                                                             "\"unit_of_measurement\":\"°C\","
+                                                             "\"device_class\":\"temperature\","
+                                                             "\"unique_id\":\""
+                        + String(MQTT_BASE) + "_temp1\","
+                                              "\"availability_topic\":\""
+                        + String(MQTT_PUBLISH_willTopic) + "\"}")
+                         .c_str(),
+                       true);
+        client.publish((String("homeassistant/sensor/") + MQTT_BASE + "/temp2/config").c_str(),
+                       ("{\"name\":\"Temp Sensor 2\","
+                        "\"state_topic\":\""
+                        + String(MQTT_PUBLISH_TOPIC_TEMP2) + "\","
+                                                             "\"unit_of_measurement\":\"°C\","
+                                                             "\"device_class\":\"temperature\","
+                                                             "\"unique_id\":\""
+                        + String(MQTT_BASE) + "_temp2\","
+                                              "\"availability_topic\":\""
+                        + String(MQTT_PUBLISH_willTopic) + "\"}")
+                         .c_str(),
+                       true);
+        client.publish((String("homeassistant/sensor/") + MQTT_BASE + "/timer/config").c_str(),
+                       ("{\"name\":\"Relay Timer\","
+                        "\"state_topic\":\""
+                        + String(MQTT_PUBLISH_TOPIC_TIMER) + "\","
+                                                                     "\"command_topic\":\""
+                        + String(MQTT_PUBLISH_TOPIC_TIMER) + "/set\","
+                                                                     "\"unit_of_measurement\":\"s\","
+                                                                     "\"unique_id\":\""
+                        + String(MQTT_BASE) + "_timer\","
+                                              "\"availability_topic\":\""
+                        + String(MQTT_PUBLISH_willTopic) + "\"}")
+                         .c_str(),
+                       true);
+
         client.publish(MQTT_PUBLISH_willTopic, MQTT_payloadAvailable);
         client.subscribe(MQTT_PUBLISH_TOPIC_COM);
         Serial.println(MQTT_PUBLISH_willTopic);
