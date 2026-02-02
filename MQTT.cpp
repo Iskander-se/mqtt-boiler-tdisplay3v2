@@ -62,6 +62,7 @@ void cMQTT::mqttLoop() {
 
       if (client.connect(MQTT_clientName, MQTT_username, MQTT_password, MQTT_PUBLISH_willTopic, 0, true, MQTT_payloadNotAvailable, true)) {
         client.publish(MQTT_PUBLISH_willTopic, MQTT_payloadAvailable);
+        Serial.println(MQTT_PUBLISH_willTopic);
        // client.subscribe(MQTT_PUBLISH_TOPIC_COM);
        // client.subscribe(MQTT_PUBLISH_TOPIC_stOTA);
 
@@ -75,7 +76,7 @@ void cMQTT::mqttLoop() {
 
     case MqttState::CONNECTED:
       client.loop();
-      Serial.println("MqttState::CONNECTED&WORK");
+      Serial.println(MQTT_PUBLISH_willTopic);
       if (!client.connected()) {
         Serial.println("MqttState::CONNECTED         ==          LOST");
         mqttState = MqttState::CONNECTING;
