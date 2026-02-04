@@ -28,6 +28,7 @@ void coreInit() {
   state.timerSec = 0;
   state.heating = false;
   state.otaActive = false;
+  state.start=true;
 
   pinMode(BUTTON_01_PIN, INPUT);
   pinMode(BUTTON_02_PIN, INPUT);
@@ -67,8 +68,8 @@ void coreButton() {
   if (!digitalRead(BUTTON_01_PIN)) {
     if (millis() - btn1_delay > 500) {
       if (!state.heating) {
-        state.timerMin = 1;
-        state.timerSec = 0;
+        state.timerMin = 0;
+        state.timerSec = 62;
       }
       state.timerMin += 10;
       if (state.timerMin > 90) state.timerMin = 90;

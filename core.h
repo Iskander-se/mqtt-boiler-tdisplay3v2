@@ -9,6 +9,7 @@ struct BoilerStateData {
     //uint16_t freeTime;
     bool heating;
     bool otaActive;
+    bool start;
 };
 
 extern BoilerStateData state;

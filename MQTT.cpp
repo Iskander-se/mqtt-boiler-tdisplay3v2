@@ -46,10 +46,55 @@ void cMQTT::wifiLoop() {
   }
 }
 
+void cMQTT::callback(char* topic, byte* payload, unsigned int length) {
+  if (strcmp(topic, MQTT_PUBLISH_TOPIC_COM) == 0) {
+    if (length == 0) return;
+
+    int timeVal = 0;
+    if (length == 1) {
+      timeVal = payload[0] - '0';
+    } else if (length == 2) {
+      timeVal = (payload[0] - '0') * 10 + (payload[1] - '0');
+    }
+
+    if (timeVal >= 5 && timeVal <= 90) {
+      state.timerMin = timeVal;
+      state.timerSec = 0;
+      Serial.printf("Core: Timer set to %d min\n", timeVal);
+    } else if (payload[0] == '1') {
+      if (state.timerMin < 1) state.timerMin = 20;
+      state.heating = 1;
+      state.timerSec = 60;
+      Serial.println("Core: Heating ON");
+    } else if (payload[0] == '0') {
+      state.timerMin = 0;
+      state.heating = 0;
+      state.timerSec = 60;
+      Serial.println("Core: Heating OFF");
+    }
+
+
+
+
+    return;
+  }
+
+  String message;
+  for (int i = 0; i < length; i++) {
+    message += (char)payload[i];
+  }
+
+  Serial.print("MQTT [");
+  Serial.print(topic);
+  Serial.print("] => ");
+  Serial.println(message);
+}
+
 void cMQTT::mqttLoop(const BoilerStateData& stateData) {
   switch (mqttState) {
     case MqttState::IDLE:
       client.setServer(MQTT_HOST, MQTT_PORT);
+      client.setCallback(cMQTT::callback);  // Вот эта привязка
       mqttRetries = 0;
       mqttState = MqttState::CONNECTING;
       break;
@@ -88,13 +133,19 @@ void cMQTT::mqttLoop(const BoilerStateData& stateData) {
         //else if (stateData.timerMin != cachedState.timerMin) changed = true;
         //else if (stateData.heating != cachedState.heating) changed = true;
 
-        if (stateData.temp_tank != cachedState.temp_tank) client.publish(MQTT_PUBLISH_TOPIC_TEMP1, String(stateData.temp_tank, 1).c_str(), true);
-        if (stateData.temp_solar != cachedState.temp_solar) client.publish(MQTT_PUBLISH_TOPIC_TEMP2, String(stateData.temp_solar, 1).c_str(), true);
-        if (stateData.timerMin != cachedState.timerMin) client.publish(MQTT_PUBLISH_TOPIC_TIMER, String(stateData.timerMin).c_str(), true);
-        if (stateData.heating != cachedState.heating) client.publish(MQTT_PUBLISH_TOPIC_STATUS, String(stateData.heating).c_str(), true);
+        if (state.temp_tank != cachedState.temp_tank) client.publish(MQTT_PUBLISH_TOPIC_TEMP1, String(state.temp_tank, 1).c_str(), true);
+        if (state.temp_solar != cachedState.temp_solar) client.publish(MQTT_PUBLISH_TOPIC_TEMP2, String(state.temp_solar, 1).c_str(), true);
+        if (state.timerMin != cachedState.timerMin) client.publish(MQTT_PUBLISH_TOPIC_TIMER, String(state.timerMin).c_str(), true);
 
-        Serial.println(MQTT_PUBLISH_willTopic);
-        Serial.println(String(stateData.timerMin).c_str());
+        if (state.start||state.heating != cachedState.heating) {
+          client.publish(MQTT_PUBLISH_TOPIC_STATUS, String(state.heating).c_str(), true);
+          client.publish(MQTT_PUBLISH_TOPIC_TIMER, String(state.timerMin).c_str(), true);
+        }
+
+        state.start = false;
+
+        //Serial.print(MQTT_PUBLISH_TOPIC_STATUS);
+        //Serial.println(String(stateData.heating).c_str());
         cachedState = stateData;
       }
 
