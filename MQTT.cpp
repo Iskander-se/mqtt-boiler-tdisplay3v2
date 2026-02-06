@@ -72,22 +72,8 @@ void cMQTT::callback(char* topic, byte* payload, unsigned int length) {
       state.timerSec = 60;
       Serial.println("Core: Heating OFF");
     }
-
-
-
-
     return;
   }
-
-  String message;
-  for (int i = 0; i < length; i++) {
-    message += (char)payload[i];
-  }
-
-  Serial.print("MQTT [");
-  Serial.print(topic);
-  Serial.print("] => ");
-  Serial.println(message);
 }
 
 void cMQTT::mqttLoop(const BoilerStateData& stateData) {
@@ -132,20 +118,26 @@ void cMQTT::mqttLoop(const BoilerStateData& stateData) {
         //else if (stateData.temp_solar != cachedState.temp_solar) changed = true;
         //else if (stateData.timerMin != cachedState.timerMin) changed = true;
         //else if (stateData.heating != cachedState.heating) changed = true;
+        char msg[16];
 
-        if (state.temp_tank != cachedState.temp_tank) client.publish(MQTT_PUBLISH_TOPIC_TEMP1, String(state.temp_tank, 1).c_str(), true);
-        if (state.temp_solar != cachedState.temp_solar) client.publish(MQTT_PUBLISH_TOPIC_TEMP2, String(state.temp_solar, 1).c_str(), true);
-        if (state.timerMin != cachedState.timerMin) client.publish(MQTT_PUBLISH_TOPIC_TIMER, String(state.timerMin).c_str(), true);
+        if (state.temp_tank != cachedState.temp_tank) {
+          dtostrf(state.temp_tank, 4, 2, msg);
+          client.publish(MQTT_PUBLISH_TOPIC_TEMP1, msg, true);}
+        if (state.temp_solar != cachedState.temp_solar) {
+          dtostrf(state.temp_solar, 4, 2, msg);
+          client.publish(MQTT_PUBLISH_TOPIC_TEMP2,msg, true);}
+        if (state.timerMin != cachedState.timerMin){
+          dtostrf(state.timerMin, 4, 2, msg);
+          client.publish(MQTT_PUBLISH_TOPIC_TIMER,msg, true);}
 
         if (state.start||state.heating != cachedState.heating) {
-          client.publish(MQTT_PUBLISH_TOPIC_STATUS, String(state.heating).c_str(), true);
-          client.publish(MQTT_PUBLISH_TOPIC_TIMER, String(state.timerMin).c_str(), true);
+          dtostrf(state.timerMin, 4, 2, msg);
+          client.publish(MQTT_PUBLISH_TOPIC_STATUS, msg, true);
+          dtostrf(state.timerMin, 4, 2, msg);
+          client.publish(MQTT_PUBLISH_TOPIC_TIMER, msg, true);
         }
 
         state.start = false;
-
-        //Serial.print(MQTT_PUBLISH_TOPIC_STATUS);
-        //Serial.println(String(stateData.heating).c_str());
         cachedState = stateData;
       }
 

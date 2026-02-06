@@ -59,30 +59,36 @@ void Views::render(const BoilerStateData& stateData) {
     ui.redrawFrame = false;
     ui.redrawData = true;
   }
-
+  char buf[10];
   if (ui.redrawData) {
     switch (ui.cur) {
       case BoilerState::STANDBY:
       case BoilerState::SCREEN_WAKE:
+
         tft->setTextSize(7);
         tft->setTextColor(TFT_GOLD, TFT_BLACK);
-        tft->drawString(String(stateData.temp_tank, 1), 67, 36);
+        dtostrf(stateData.temp_tank, 4, 1, buf);
+        tft->drawString(buf, 67, 36);
         tft->setTextSize(5);
         tft->setTextColor(TFT_ORANGE, TFT_BLACK);
-        tft->drawString(String(stateData.temp_solar, 1), 43, 98);
+        dtostrf(stateData.temp_solar, 4, 1, buf);
+        tft->drawString(buf, 43, 98);
         break;
       case BoilerState::HEATING:
         int timer1 = stateData.timerMin;
         tft->setTextSize(3);
         tft->setTextColor(TFT_GOLD, TFT_BLACK);
-        tft->drawString(String(stateData.temp_tank,1), 1, 114);
+        dtostrf(stateData.temp_tank, 4, 1, buf);
+        tft->drawString(buf, 1, 114);
         tft->setTextColor(TFT_ORANGE, TFT_BLACK);
-        tft->drawString(String(stateData.temp_solar, 1), 92, 114);
+        dtostrf(stateData.temp_solar, 4, 1, buf);
+        tft->drawString(buf, 92, 114);
 
         tft->setTextSize(8);
         tft->setTextColor(TFT_RED, TFT_BLACK);
-        if (timer1 > 9) tft->drawString(String(timer1) + "min", 18, 36);
-        else tft->drawString(" " + String(timer1) + "min ", 8, 36);
+        tft->setTextPadding(tft->textWidth(" 88.8min "));
+        snprintf(buf, sizeof(buf), "%.1dmin", timer1);
+        tft->drawString(buf, (timer1 > 9 ? 18 : 8), 36);
         break;
     }
     ui.redrawData = false;
