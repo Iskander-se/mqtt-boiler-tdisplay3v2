@@ -5,7 +5,7 @@
 #include "core.h"
 
 #define TFT_BL 4
-#define BL_STANDBY 110
+#define BL_STANDBY 20
 #define BL_ACTIVE 250
 #define BL_STEP 2
 
