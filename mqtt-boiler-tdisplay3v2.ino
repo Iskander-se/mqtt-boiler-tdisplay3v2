@@ -35,7 +35,7 @@ void loop() {
   unsigned long currentMillis = millis();
   freeCounter++;
   coreButton();
-  if (currentMillis - mqttTime.previous >= mqttTime.period) {
+  if (state.start||(currentMillis - mqttTime.previous >= mqttTime.period)) {
     mqttTime.previous = currentMillis;
     freeCounter = 0;
     coreTick();

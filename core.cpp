@@ -66,6 +66,7 @@ void coreButton() {
 
   if (!digitalRead(BUTTON_01_PIN)) {
     if (millis() - btn1_delay > 500) {
+      state.start = true;
       if (!state.heating) {
         state.timerMin = 0;
         state.timerSec = 62;

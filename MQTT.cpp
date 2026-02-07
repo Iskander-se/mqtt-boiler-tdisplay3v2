@@ -102,10 +102,10 @@ void cMQTT::mqttLoop() {
         snprintf(state.statusStr, sizeof(state.statusStr), "MQTT.OK");
         mqttState = MqttState::CONNECTED;
       } else {
-        if (++mqttRetries > 5) {          
+        if (++mqttRetries > 5) {
           mqttState = MqttState::FAILED;
           wifiState = WifiState::IDLE;
-        }else snprintf(state.statusStr, sizeof(state.statusStr), "MQTT.ERR");
+        } else snprintf(state.statusStr, sizeof(state.statusStr), "MQTT.ERR");
       }
 
       break;
@@ -127,15 +127,15 @@ void cMQTT::mqttLoop() {
           dtostrf(state.temp_solar, 4, 2, msg);
           client.publish(MQTT_PUBLISH_TOPIC_TEMP2, msg, true);
         }
-        if (state.timerMin != cachedState.timerMin) {
-          dtostrf(state.timerMin, 4, 2, msg);
-          client.publish(MQTT_PUBLISH_TOPIC_TIMER, msg, true);
-        }
+
 
         if (state.start || state.heating != cachedState.heating) {
-          dtostrf(state.timerMin, 4, 2, msg);
-          client.publish(MQTT_PUBLISH_TOPIC_STATUS, msg, true);
-          dtostrf(state.timerMin, 4, 2, msg);
+          client.publish(MQTT_PUBLISH_TOPIC_STATUS, state.heating ? "1" : "0", true);
+          cachedState.timerMin = 0;
+        }
+
+        if (state.timerMin != cachedState.timerMin) {
+          itoa(state.timerMin, msg, 10);
           client.publish(MQTT_PUBLISH_TOPIC_TIMER, msg, true);
         }
 
