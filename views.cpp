@@ -9,7 +9,7 @@ void Views::begin(TFT_eSPI* display) {
   tft->setRotation(1);
   tft->fillScreen(TFT_BLACK);
 
-  ui.cur = BoilerState::STANDBY;
+  ui.cur = BoilerState::INITHW;
   ui.prev = ui.cur;
   ui.redrawFrame = true;
   ui.redrawData = true;
@@ -36,6 +36,11 @@ void Views::render(const BoilerStateData& stateData) {
   else if (stateData.timerMin != cachedState.timerMin) changed = true;
   else if (stateData.heating != cachedState.heating) changed = true;
 
+  if (strcmp(stateData.statusStr, cachedState.statusStr) != 0) {
+    changed = true;
+    ui.redrawFrame = true;
+  }
+
   if (changed) {
     cachedState = stateData;
     ui.redrawData = true;
@@ -44,9 +49,13 @@ void Views::render(const BoilerStateData& stateData) {
   }
 
   if (ui.redrawFrame) {
+    
     tft->fillScreen(TFT_BLACK);
+    //statusStr = stateData.statusStr;
+    //dtostrf(stateData.statusStr, 10, 1, statusStr);
     ViewBG();  // as before
     switch (ui.cur) {
+      case BoilerState::INITHW:
       case BoilerState::STANDBY:
       case BoilerState::SCREEN_WAKE:
         tft->drawXBitmap(5, 34, thermometer48, 48, 48, TFT_GOLD);
@@ -59,9 +68,12 @@ void Views::render(const BoilerStateData& stateData) {
     ui.redrawFrame = false;
     ui.redrawData = true;
   }
-  char buf[10];
+
+  char buf[4];
+
   if (ui.redrawData) {
     switch (ui.cur) {
+      case BoilerState::INITHW:
       case BoilerState::STANDBY:
       case BoilerState::SCREEN_WAKE:
 
@@ -71,7 +83,7 @@ void Views::render(const BoilerStateData& stateData) {
         tft->drawString(buf, 67, 36);
         tft->setTextSize(5);
         tft->setTextColor(TFT_ORANGE, TFT_BLACK);
-        dtostrf(stateData.temp_solar, 4, 1, buf);
+        dtostrf(stateData.temp_solar, 3, 1, buf);
         tft->drawString(buf, 43, 98);
         break;
       case BoilerState::HEATING:
@@ -83,12 +95,12 @@ void Views::render(const BoilerStateData& stateData) {
         tft->setTextColor(TFT_ORANGE, TFT_BLACK);
         dtostrf(stateData.temp_solar, 4, 1, buf);
         tft->drawString(buf, 92, 114);
-
+        char buftm[11];
         tft->setTextSize(8);
         tft->setTextColor(TFT_RED, TFT_BLACK);
-        tft->setTextPadding(tft->textWidth(" 88.8min "));
-        snprintf(buf, sizeof(buf), "%.1dmin", timer1);
-        tft->drawString(buf, (timer1 > 9 ? 18 : 8), 36);
+        //tft->setTextPadding(tft->textWidth(" 88.8min "));
+        snprintf(buftm, sizeof(buftm), (timer1 > 9 ? "%dmin " : " %dmin"), timer1);
+        tft->drawString(buftm, (timer1 > 9 ? 8 : 12), 36);
         break;
     }
     ui.redrawData = false;
@@ -102,7 +114,7 @@ void Views::render(const BoilerStateData& stateData) {
 void Views::ViewBG() {
   tft->setTextSize(2);
   tft->setTextColor(TFT_NAVY, TFT_BLACK);
-  tft->drawString("String", 1, 2);
+  tft->drawString(cachedState.statusStr, 1, 2);
   tft->setTextColor(TFT_SILVER, TFT_BLACK);
   tft->drawString("ON (+10min)", 105, 2);
   //bottom

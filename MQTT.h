@@ -6,7 +6,7 @@
 class cMQTT {
 public:
   cMQTT();
-  void loop(const BoilerStateData& state);
+  void loop();
   static void callback(char* topic, byte* payload, unsigned int length);
 
 private:
@@ -29,7 +29,7 @@ private:
   MqttState mqttState;
   uint32_t mqttStartMs;
   uint8_t mqttRetries;
-  void mqttLoop(const BoilerStateData& state);
+  void mqttLoop();
 
   // clients
   WiFiClient espClient;

@@ -28,7 +28,7 @@ void coreInit() {
   state.timerSec = 0;
   state.heating = false;
   state.otaActive = false;
-  state.start=true;
+  state.start = true;
 
   pinMode(BUTTON_01_PIN, INPUT);
   pinMode(BUTTON_02_PIN, INPUT);
@@ -36,18 +36,17 @@ void coreInit() {
   buttons.btn2 = false;
 
   ds.begin();
-  ds.setResolution(TANK, 9);
-  ds.setResolution(SOLAR, 9);
+  ds.setWaitForConversion(false);
+  ds.setResolution(TANK, 11);
+  ds.setResolution(SOLAR, 11);
   ds.requestTemperatures();
-  state.temp_tank = ds.getTempC(TANK);
-  state.temp_solar = ds.getTempC(SOLAR);
 }
 
 void coreTick() {
-  ds.requestTemperatures();
+
   state.temp_tank = ds.getTempC(TANK);
   state.temp_solar = ds.getTempC(SOLAR);
-
+  ds.requestTemperatures();
   state.heating = (state.timerMin > 0);
 
 

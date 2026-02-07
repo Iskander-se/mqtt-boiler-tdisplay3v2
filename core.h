@@ -6,6 +6,7 @@ struct BoilerStateData {
     float temp_solar;
     uint16_t timerMin;
     uint16_t timerSec;
+    char statusStr[10];
     //uint16_t freeTime;
     bool heating;
     bool otaActive;

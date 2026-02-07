@@ -5,11 +5,12 @@
 #include "core.h"
 
 #define TFT_BL 4
-#define BL_STANDBY 10
+#define BL_STANDBY 110
 #define BL_ACTIVE 250
 #define BL_STEP 2
 
-enum class BoilerState : uint8_t { STANDBY,
+enum class BoilerState : uint8_t { INITHW,
+                                   STANDBY,
                                    HEATING,
                                    SCREEN_WAKE };
 
@@ -22,7 +23,7 @@ public:
 
 private:
   TFT_eSPI* tft = nullptr;
-
+  char statusStr[10];
   struct UIState {
     BoilerState cur;
     BoilerState prev;
@@ -31,7 +32,7 @@ private:
     bool redrawData;
   } ui;
 
-   BoilerStateData cachedState{};
+  BoilerStateData cachedState{};
 
   void ViewBG();
 };

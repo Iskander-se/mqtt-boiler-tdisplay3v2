@@ -6,10 +6,10 @@ cMQTT::cMQTT()
 
 
 
-void cMQTT::loop(const BoilerStateData& stateData) {
+void cMQTT::loop() {
   wifiLoop();
   if (WiFi.status() == WL_CONNECTED) {
-    mqttLoop(stateData);
+    mqttLoop();
   }
 }
 
@@ -22,21 +22,23 @@ void cMQTT::wifiLoop() {
       wifiStartMs = millis();
       wifiRetries = 0;
       wifiState = WifiState::CONNECTING;
-
+      snprintf(state.statusStr, sizeof(state.statusStr), "WIFI...");
       break;
 
     case WifiState::CONNECTING:
       if (WiFi.status() == WL_CONNECTED) {
         wifiState = WifiState::CONNECTED;
         Serial.println("WifiState::CONNECTED");
+        snprintf(state.statusStr, sizeof(state.statusStr), "WIFI.OK");
       } else if (millis() - wifiStartMs > 5000) {
-        if (++wifiRetries > 3) {
-          wifiState = WifiState::FAILED;
-        } else {
-          WiFi.disconnect();
-          WiFi.begin(WIFI_SSID, WIFI_PASS);
-          wifiStartMs = millis();
-        }
+        // if (++wifiRetries > 3) {
+        //   wifiState = WifiState::FAILED;
+        // } else {
+        snprintf(state.statusStr, sizeof(state.statusStr), "WIFI.ERR");
+        WiFi.disconnect();
+        WiFi.begin(WIFI_SSID, WIFI_PASS);
+        wifiStartMs = millis();
+        // }
       }
       break;
 
@@ -76,19 +78,19 @@ void cMQTT::callback(char* topic, byte* payload, unsigned int length) {
   }
 }
 
-void cMQTT::mqttLoop(const BoilerStateData& stateData) {
+void cMQTT::mqttLoop() {
   switch (mqttState) {
     case MqttState::IDLE:
       client.setServer(MQTT_HOST, MQTT_PORT);
-      client.setCallback(cMQTT::callback);  // Вот эта привязка
+      client.setCallback(cMQTT::callback);
       mqttRetries = 0;
       mqttState = MqttState::CONNECTING;
+      snprintf(state.statusStr, sizeof(state.statusStr), "MQTT...");
       break;
 
     case MqttState::CONNECTING:
       if (client.connected()) {
         mqttState = MqttState::CONNECTED;
-        Serial.println("MqttState::CONNECTED");
         break;
       }
 
@@ -97,11 +99,13 @@ void cMQTT::mqttLoop(const BoilerStateData& stateData) {
         Serial.println(MQTT_PUBLISH_willTopic);
         client.subscribe(MQTT_PUBLISH_TOPIC_COM);
         // client.subscribe(MQTT_PUBLISH_TOPIC_stOTA);
-
+        snprintf(state.statusStr, sizeof(state.statusStr), "MQTT.OK");
         mqttState = MqttState::CONNECTED;
       } else {
-        if (++mqttRetries > 3)
+        if (++mqttRetries > 5) {          
           mqttState = MqttState::FAILED;
+          wifiState = WifiState::IDLE;
+        }else snprintf(state.statusStr, sizeof(state.statusStr), "MQTT.ERR");
       }
 
       break;
@@ -113,24 +117,22 @@ void cMQTT::mqttLoop(const BoilerStateData& stateData) {
         Serial.println("MqttState::CONNECTED         ==          LOST");
         mqttState = MqttState::CONNECTING;
       } else {
-
-        //if (stateData.temp_tank != cachedState.temp_tank) changed = true;
-        //else if (stateData.temp_solar != cachedState.temp_solar) changed = true;
-        //else if (stateData.timerMin != cachedState.timerMin) changed = true;
-        //else if (stateData.heating != cachedState.heating) changed = true;
         char msg[16];
 
         if (state.temp_tank != cachedState.temp_tank) {
           dtostrf(state.temp_tank, 4, 2, msg);
-          client.publish(MQTT_PUBLISH_TOPIC_TEMP1, msg, true);}
+          client.publish(MQTT_PUBLISH_TOPIC_TEMP1, msg, true);
+        }
         if (state.temp_solar != cachedState.temp_solar) {
           dtostrf(state.temp_solar, 4, 2, msg);
-          client.publish(MQTT_PUBLISH_TOPIC_TEMP2,msg, true);}
-        if (state.timerMin != cachedState.timerMin){
+          client.publish(MQTT_PUBLISH_TOPIC_TEMP2, msg, true);
+        }
+        if (state.timerMin != cachedState.timerMin) {
           dtostrf(state.timerMin, 4, 2, msg);
-          client.publish(MQTT_PUBLISH_TOPIC_TIMER,msg, true);}
+          client.publish(MQTT_PUBLISH_TOPIC_TIMER, msg, true);
+        }
 
-        if (state.start||state.heating != cachedState.heating) {
+        if (state.start || state.heating != cachedState.heating) {
           dtostrf(state.timerMin, 4, 2, msg);
           client.publish(MQTT_PUBLISH_TOPIC_STATUS, msg, true);
           dtostrf(state.timerMin, 4, 2, msg);
@@ -138,7 +140,7 @@ void cMQTT::mqttLoop(const BoilerStateData& stateData) {
         }
 
         state.start = false;
-        cachedState = stateData;
+        cachedState = state;
       }
 
       break;
