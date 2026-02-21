@@ -32,16 +32,16 @@ bool inithw = false;
 
 void loop() {
   unsigned long currentMillis = millis();
-  freeCounter++;
+
   coreButton();
-  if (state.start||(currentMillis - mqttTime.previous >= mqttTime.period)) {
+  if (state.start || (currentMillis - mqttTime.previous >= mqttTime.period)) {
     mqttTime.previous = currentMillis;
-    freeCounter = 0;
     coreTick();
     MQTT.loop();
     inithw = true;
-    //***
-  }
+    Serial.printf("freeCounter = %-8d\n", freeCounter);
+    freeCounter = 0;
+  } else freeCounter++;
 
   if (currentMillis - mainTime.previous >= mainTime.period) {
     mainTime.previous = currentMillis;
@@ -49,8 +49,6 @@ void loop() {
     if (state.heating) views.setState(BoilerState::HEATING);
     else if (state.timerSec) views.setState(BoilerState::SCREEN_WAKE);
     else views.setState(BoilerState::STANDBY);
-
     views.render(state);
-    freeCounter = 0;
   }
 }
