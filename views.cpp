@@ -49,7 +49,7 @@ void Views::render(const BoilerStateData& stateData) {
   }
 
   if (ui.redrawFrame) {
-    
+
     tft->fillScreen(TFT_BLACK);
     //statusStr = stateData.statusStr;
     //dtostrf(stateData.statusStr, 10, 1, statusStr);
@@ -74,6 +74,7 @@ void Views::render(const BoilerStateData& stateData) {
   if (ui.redrawData) {
     switch (ui.cur) {
       case BoilerState::INITHW:
+        break;
       case BoilerState::STANDBY:
       case BoilerState::SCREEN_WAKE:
 

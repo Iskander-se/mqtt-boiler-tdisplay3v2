@@ -42,10 +42,14 @@ void coreInit() {
   ds.requestTemperatures();
 }
 
+float roundToOne(float value) {
+  return round(value * 10.0f) / 10.0f;
+}
+
 void coreTick() {
 
-  state.temp_tank = ds.getTempC(TANK);
-  state.temp_solar = ds.getTempC(SOLAR);
+  state.temp_tank = roundToOne(ds.getTempC(TANK));
+  state.temp_solar = roundToOne(ds.getTempC(SOLAR));
   ds.requestTemperatures();
   state.heating = (state.timerMin > 0);
 
@@ -56,7 +60,7 @@ void coreTick() {
     state.timerSec = 60;
   }
   if (state.timerSec > 0) state.timerSec -= 2;
-
+  state.start = false;
   // OTA
   // state.otaActive = ...
 }

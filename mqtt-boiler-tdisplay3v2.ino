@@ -22,7 +22,6 @@ void setup() {
   views.setState(BoilerState::INITHW);
   coreInit();
   Serial.println("init");
-  Serial.println(state.timerSec);
 }
 
 sTimeer mainTime = { 0, 200 };   //GUI timer
