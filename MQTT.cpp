@@ -112,27 +112,31 @@ void cMQTT::mqttLoop() {
         mqttState = MqttState::CONNECTING;
       } else {
         char msg[16];
+        float threshold = 0.1;
 
-        if (state.temp_tank != cachedState.temp_tank) {
+        if (abs(state.temp_tank - cachedState.temp_tank) >= threshold) {
+          cachedState.temp_tank=state.temp_tank;
           dtostrf(state.temp_tank, 4, 1, msg);
           client.publish(MQTT_PUBLISH_TOPIC_TEMP1, msg, true);
         }
-        if (state.temp_solar != cachedState.temp_solar) {
+        if (abs(state.temp_solar - cachedState.temp_solar) >= threshold) {
+          cachedState.temp_solar=state.temp_solar;
           dtostrf(state.temp_solar, 4, 1, msg);
           client.publish(MQTT_PUBLISH_TOPIC_TEMP2, msg, true);
         }
 
 
         if (state.start || state.heating != cachedState.heating) {
+          cachedState.heating = state.heating;
           client.publish(MQTT_PUBLISH_TOPIC_STATUS, state.heating ? "1" : "0", true);
           cachedState.timerMin = -1;
         }
 
         if (state.timerMin != cachedState.timerMin) {
+          cachedState.timerMin = state.timerMin;
           itoa(state.timerMin, msg, 10);
           client.publish(MQTT_PUBLISH_TOPIC_TIMER, msg, true);
         }
-        cachedState = state;
       }
 
       break;

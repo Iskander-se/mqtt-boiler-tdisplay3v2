@@ -37,19 +37,21 @@ void coreInit() {
 
   ds.begin();
   ds.setWaitForConversion(false);
-  ds.setResolution(TANK, 11);
-  ds.setResolution(SOLAR, 11);
+  ds.setResolution(TANK, 10);
+  ds.setResolution(SOLAR, 10);
   ds.requestTemperatures();
-}
-
-float roundToOne(float value) {
-  return round(value * 10.0f) / 10.0f;
 }
 
 void coreTick() {
 
-  state.temp_tank = roundToOne(ds.getTempC(TANK));
-  state.temp_solar = roundToOne(ds.getTempC(SOLAR));
+  if (state.start) {
+    state.temp_tank = ds.getTempC(TANK);
+    state.temp_solar = ds.getTempC(SOLAR);
+  } else {
+    state.temp_tank = (state.temp_tank * 4 + ds.getTempC(TANK)) / 5;
+    state.temp_solar = (state.temp_solar * 4 + ds.getTempC(SOLAR)) / 5;
+  }
+
   ds.requestTemperatures();
   state.heating = (state.timerMin > 0);
 

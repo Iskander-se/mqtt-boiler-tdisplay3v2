@@ -17,7 +17,7 @@ Views views;
 void setup() {
 
   Serial.begin(115200);
-
+  delay(200);
   views.begin(&tft);
   views.setState(BoilerState::INITHW);
   coreInit();
