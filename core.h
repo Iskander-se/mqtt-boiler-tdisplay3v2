@@ -1,28 +1,29 @@
 #pragma once
-#include <stdint.h>
+#include <Arduino.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
-struct BoilerStateData {
+class cCORE {
+public:
+  cCORE();
+  void begin();
+  void tick();
+  void handleButton();
+
+private:
+  struct sdata {
     float temp_tank;
     float temp_solar;
-    uint16_t timerMin;
-    uint16_t timerSec;
-    char statusStr[10];
-    //uint16_t freeTime;
-    bool heating;
-    bool otaActive;
-    bool start;
-};
+    uint16_t timerMin = 0;
+    uint16_t timerSec = 0;
+    bool heating = false;
+    bool otaActive = false;
+    bool start = true;
+  } _sdata;
 
-extern BoilerStateData state;
-
-// Состояние кнопок
-struct ButtonState {
+  struct ButtonState {
     bool btn1;
     bool btn2;
-};
-extern ButtonState buttons;
+  }_btns;
 
-void coreInit();
-
-void coreTick();
-void coreButton();
+}

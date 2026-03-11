@@ -1,48 +1,35 @@
-#pragma once
 #include "core.h"
+#include "config.h"
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
 
 
-// ==== Hardware ====
-constexpr uint8_t ONE_WIRE_BUS = 25;
-constexpr uint8_t RELAY_PIN = 5;
-constexpr uint8_t BUTTON_01_PIN = 35;
-constexpr uint8_t BUTTON_02_PIN = 0;
-
-DeviceAddress TANK = { 0x28, 0x0C, 0xE8, 0xC7, 0x00, 0x00, 0x00, 0x38 };
-DeviceAddress SOLAR = { 0x28, 0x74, 0x90, 0xC7, 0x00, 0x00, 0x00, 0x52 };
 
 
-BoilerStateData state;
-ButtonState buttons;
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature ds(&oneWire);
+DeviceAddress TANK_ADDR = { 0x28, 0x0C, 0xE8, 0xC7, 0x00, 0x00, 0x00, 0x38 };
+DeviceAddress SOLAR_ADDR = { 0x28, 0x74, 0x90, 0xC7, 0x00, 0x00, 0x00, 0x52 };
 
-void coreInit() {
-  state.temp_tank = 0;
-  state.temp_solar = 0;
-  state.timerMin = 0;
-  state.timerSec = 0;
-  state.heating = false;
-  state.otaActive = false;
-  state.start = true;
+cCORE::cCORE(uint8_t owPin, uint8_t rPin, uint8_t b1Pin, uint8_t b2Pin)
+  : _relayPin(RELAYpin), _btn01Pin(BUTTON01pin), _btn02Pin(BUTTON02pin), _oneWire(ONE_WIRE_BUSpin), _ds(&_oneWire) {}
 
-  pinMode(BUTTON_01_PIN, INPUT);
-  pinMode(BUTTON_02_PIN, INPUT);
-  buttons.btn1 = false;
-  buttons.btn2 = false;
+void cCORE::begin() {
+  pinMode(_relayPin, OUTPUT);
+  digitalWrite(_relayPin, LOW);
+  pinMode(BUTTON01pin, INPUT);
+  pinMode(BUTTON02pin, INPUT);
 
-  ds.begin();
-  ds.setWaitForConversion(false);
-  ds.setResolution(TANK, 10);
-  ds.setResolution(SOLAR, 10);
-  ds.requestTemperatures();
+  _ds.begin();
+  _ds.setWaitForConversion(false);
+  _ds.setResolution(TANK_ADDR, 10);
+  _ds.setResolution(SOLAR_ADDR, 10);
+  _ds.requestTemperatures();
 }
 
-void coreTick() {
+
+
+void cCORE::ctick() {
 
   if (state.start) {
     state.temp_tank = ds.getTempC(TANK);
@@ -67,7 +54,7 @@ void coreTick() {
   // state.otaActive = ...
 }
 
-void coreButton() {
+void cCORE::handleButton() {
   static uint32_t btn1_delay, btn2_delay;
 
   if (!digitalRead(BUTTON_01_PIN)) {
