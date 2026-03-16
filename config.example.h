@@ -2,14 +2,10 @@
 #include <stdint.h>
 
 // ==== Hardware ====
-constexpr uint8_t ONE_WIRE_BUSpin = 25;
-constexpr uint8_t RELAYpin = 5;
-constexpr uint8_t BUTTON01pin = 35;
-constexpr uint8_t BUTTON02pin = 0;
-
-// ==== Timing ====
-constexpr uint32_t LOGIC_PERIOD_MS = 200;
-constexpr uint32_t UI_PERIOD_MS    = 500;
+// constexpr uint8_t ONE_WIRE_BUSpin = 25;
+// constexpr uint8_t RELAYpin = 5;
+// constexpr uint8_t BUTTON01pin = 35;
+// constexpr uint8_t BUTTON02pin = 0;
 
 // ==== WiFi ====
 constexpr char WIFI_SSID[] = "####";  //Iskander-AP    //"xxx"

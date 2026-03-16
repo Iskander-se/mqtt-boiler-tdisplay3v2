@@ -3,13 +3,17 @@
 #include <PubSubClient.h>
 #include "core.h"
 
+class cCORE;
+
 class cMQTT {
 public:
   cMQTT();
+  void begin(cCORE* corePtr);
   void loop();
   static void callback(char* topic, byte* payload, unsigned int length);
 
 private:
+  cCORE* _core = nullptr;
   enum class WifiState : uint8_t { IDLE,
                                    CONNECTING,
                                    CONNECTED,

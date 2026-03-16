@@ -19,7 +19,7 @@ public:
   void begin(TFT_eSPI* display);
   void setState(BoilerState st);
 
-  void render(const BoilerStateData& state);
+  void render(const BoilerStateData& stateData);
 
 private:
   TFT_eSPI* tft = nullptr;

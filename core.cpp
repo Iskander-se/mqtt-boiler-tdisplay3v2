@@ -1,44 +1,43 @@
 #include "core.h"
-#include "config.h"
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-
-
-
-
-DeviceAddress TANK_ADDR = { 0x28, 0x0C, 0xE8, 0xC7, 0x00, 0x00, 0x00, 0x38 };
-DeviceAddress SOLAR_ADDR = { 0x28, 0x74, 0x90, 0xC7, 0x00, 0x00, 0x00, 0x52 };
-
-cCORE::cCORE(uint8_t owPin, uint8_t rPin, uint8_t b1Pin, uint8_t b2Pin)
-  : _relayPin(RELAYpin), _btn01Pin(BUTTON01pin), _btn02Pin(BUTTON02pin), _oneWire(ONE_WIRE_BUSpin), _ds(&_oneWire) {}
+cCORE::cCORE()
+  : oneWire(ONE_WIRE_BUS_PIN),
+    ds(&oneWire) {
+}
 
 void cCORE::begin() {
-  pinMode(_relayPin, OUTPUT);
-  digitalWrite(_relayPin, LOW);
-  pinMode(BUTTON01pin, INPUT);
-  pinMode(BUTTON02pin, INPUT);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);
+  pinMode(BUTTON_01_PIN, INPUT);
+  pinMode(BUTTON_02_PIN, INPUT);
 
-  _ds.begin();
-  _ds.setWaitForConversion(false);
-  _ds.setResolution(TANK_ADDR, 10);
-  _ds.setResolution(SOLAR_ADDR, 10);
-  _ds.requestTemperatures();
+  ds.begin();
+  ds.setWaitForConversion(false);
+  ds.setResolution(TANK_ADDR, 10);
+  ds.setResolution(SOLAR_ADDR, 10);
+  ds.requestTemperatures();
 }
 
 
 
-void cCORE::ctick() {
+void cCORE::tick() {
 
-  if (state.start) {
-    state.temp_tank = ds.getTempC(TANK);
-    state.temp_solar = ds.getTempC(SOLAR);
+  float t_tank = ds.getTempC(TANK_ADDR);
+  float t_solar = ds.getTempC(SOLAR_ADDR);
+
+  if (state.phase == SystemPhase::READY) {
+    state.temp_tank = (state.temp_tank * 4 + t_tank) / 5;
+    state.temp_solar = (state.temp_solar * 4 + t_solar) / 5;
+  } else if (state.phase == SystemPhase::SENSORS) {
+    state.temp_tank = t_tank;
+    state.temp_solar = t_solar;
+    state.setStatus("OK", SystemPhase::READY);
   } else {
-    state.temp_tank = (state.temp_tank * 4 + ds.getTempC(TANK)) / 5;
-    state.temp_solar = (state.temp_solar * 4 + ds.getTempC(SOLAR)) / 5;
+    state.setStatus("SENS", SystemPhase::SENSORS);
   }
-
   ds.requestTemperatures();
   state.heating = (state.timerMin > 0);
 
@@ -49,7 +48,6 @@ void cCORE::ctick() {
     state.timerSec = 60;
   }
   if (state.timerSec > 0) state.timerSec -= 2;
-  state.start = false;
   // OTA
   // state.otaActive = ...
 }
@@ -59,7 +57,6 @@ void cCORE::handleButton() {
 
   if (!digitalRead(BUTTON_01_PIN)) {
     if (millis() - btn1_delay > 500) {
-      state.start = true;
       if (!state.heating) {
         state.timerMin = 0;
         state.timerSec = 62;
